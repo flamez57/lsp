@@ -9,7 +9,7 @@ import java.util.List;
 
 public class lsp {
     public static void main(String[] args) {
-        File folder = new File("1971");
+        File folder = new File("1972");
         File[] files = folder.listFiles();
         int i = 0;
         if (files != null) {
