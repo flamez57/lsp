@@ -15,8 +15,8 @@ public class lsp {
         
         System.out.println("param length:"+args.length);
 
-        FolderUtil f = new lsp.FolderUtil(args[0]);
-        f.fileCount();
+        FolderUtil f = new FolderUtil(args[0]);
+
         List<PicCount> picCounts = f.getPicCountList();
         System.out.println(picCounts);
         //fileCount(args[0]);
@@ -102,52 +102,8 @@ public class lsp {
         return num;
     }
 
-    class FolderUtil {
-        private List<PicCount> picCountList;
-        private String folderPath;
 
-        public FolderUtil(String folderPath) {
-            this.folderPath = folderPath;
-        }
 
-        public int fileCount() {
-            File folder = new File(folderPath);
-            File[] files = folder.listFiles();
-            int num = 0;
-            if (files != null) {
-                for (File file : files) {
-                    if (file.isFile()) {
-                        num++;
-                    } else if (file.isDirectory()) {
-                        picCountList.add(new PicCount(file.getName(), this.fileCount(file.getAbsolutePath())));
-                    }
-                }
-            }
-            return num;
-        }
-
-        public List<PicCount> getPicCountList() {
-            return this.picCountList;
-        }
-    }
-
-    /*
-     * Number of files in a folder data model
-     */
-    class PicCount {
-        String name;
-        int qty;
-        public PicCount(String name, int qty) {
-            this.name = name;
-            this.qty = qty;
-        }
-        public void setName(String name) {
-            this.name = name;
-        }
-        public void setQty(int qty) {
-            this.qty = qty;
-        }
-    }
 
     public static List<String> getAllFiles(String folderPath) {
         List<String> fileList = new ArrayList<>();
@@ -168,5 +124,53 @@ public class lsp {
             }
         }
         return fileList;
+    }
+}
+
+class FolderUtil {
+    private List<PicCount> picCountList;
+    private String folderPath;
+
+    public FolderUtil(String folderPath) {
+        this.folderPath = folderPath;
+        fileCount(this.folderPath);
+    }
+
+    public int fileCount(String folderPath) {
+        File folder = new File(folderPath);
+        File[] files = folder.listFiles();
+        int num = 0;
+        if (files != null) {
+            for (File file : files) {
+                if (file.isFile()) {
+                    num++;
+                } else if (file.isDirectory()) {
+                    picCountList.add(new PicCount(file.getName(), fileCount(file.getAbsolutePath())));
+                }
+            }
+        }
+        return num;
+    }
+
+    public List<PicCount> getPicCountList() {
+        return this.picCountList;
+    }
+}
+
+/*
+* Number of files in a folder data model
+*/
+class PicCount {
+    String name;
+    int qty;
+    public PicCount(String name, int qty) {
+        this.name = name;
+        this.qty = qty;
+    }
+    public void setName(String name) {
+        this.name = name;
+    }
+    public void setQty(int qty) {
+        this.qty = qty;
     }
 }
