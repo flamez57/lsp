@@ -76,11 +76,120 @@
         .btn_group span:nth-child(2){
             background: #fd7575;
         }
+
+        nav {
+            display: flex;
+            justify-content: center; /* 水平居中 */
+            align-items: center; /* 垂直居中 */
+        }
+
+        ul {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        li {
+            flex: 1; /* 平均分配空间 */
+            text-align: center;
+        }
+
+        a {
+            display: block;
+            padding: 10px;
+            text-decoration: none;
+            color: #333;
+        }
+
+        @media screen and (max-width: 768px) {
+            nav {
+                flex-direction: column; /* 垂直布局 */
+            }
+
+            ul {
+                flex-direction: column;
+                position: absolute; /* 脱离文档流 */
+                top: 60px;
+                left: 0;
+                width: 100%;
+                background-color: #fff;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+                opacity: 0; /* 隐藏菜单 */
+                visibility: hidden; /* 隐藏菜单 */
+                transition: all 0.3s ease; /* 过渡动画 */
+            }
+
+            li {
+                flex: none;
+            }
+
+            a {
+                padding: 10px 20px;
+                border-bottom: 1px solid #eee;
+            }
+
+            /* 显示菜单 */
+            nav.active ul {
+                opacity: 1;
+                visibility: visible;
+            }
+        }
     </style>
     <script src='js/vue.js'></script>
+    <script src='js/data.js'></script>
 </head>
 
 <body>
+    <nav>
+        <ul>
+            <li><a href="#">1970</a></li>
+            <li><a href="#">1971</a></li>
+            <li><a href="#">1972</a></li>
+            <li><a href="#">1973</a></li>
+        </ul>
+    </nav>
+    <script>
+        /**
+        * 根据变量名获取匹配值
+        */
+        function getQueryString(name) {
+            var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
+            var r = window.location.search.substr(1).match(reg);
+            if (r != null) return unescape(r[2]); return null;
+        } 
+        var currentMenu = getQueryString('y');
+        if (currentMenu == null) {
+            currentMenu = 1970;
+        }
+        var picArr = [];
+        console.log(menus);
+        const nav = document.querySelector('nav');
+        const button = document.createElement('div');
+        button.textContent = '〓•〓';
+        button.setAttribute('style', 'border:10px solid black;border-top-right-radius:40px;border-bottom-left-radius:40px')
+        nav.insertBefore(button, nav.firstChild);
+        var menuStr = '';
+        for (let i = 0; i < menus.length; i++) {
+            menuStr += '<li><a href="index.html?y='+menus[i].name+'">'+menus[i].name+'</a></li>';
+            console.log(menus[i]);
+            if (menus[i].name == currentMenu) {
+                for (let j = 0; j < menus[i].list.length; j++) {
+                    for (let k = 0; k < menus[i].list[j].qty; k++) {
+                        picArr.push({src: "./"+menus[i].name+"/"+menus[i].list[j].name+"/"+k+".jpg"})
+                    }
+                    
+                }
+            }
+        }
+        console.log(picArr);
+        if (menuStr != '') {
+            nav.lastElementChild.innerHTML = menuStr;
+        }
+        button.addEventListener('click', function() {
+            nav.classList.toggle('active');
+        });
+    </script>
     <div class="warp" id="app">
         <div class="card_container">
             <div 
@@ -111,12 +220,13 @@
     var myApp = new Vue({
         el: "#app",
         data: {
-            arr: [
-                { src: './1970/1970-01/0.jpg' }, { src: './1970/1970-01/1.jpg' },{ src: './1970/1970-01/2.jpg' },
+            arr: picArr,
+            /*[
+                { src: './1970/1970-01/99.jpg' }, { src: './1970/1970-01/1.jpg' },{ src: './1970/1970-01/2.jpg' },
                 { src: './1971/1971-01/0.jpg' }, { src: './1971/1971-01/1.jpg' },{ src: './1971/1971-01/3.jpg' },
                 { src: './1972/1972-01/0.jpg' }, { src: './1973/1973-01/0.jpg' },{ src: './1973/1973-01/1.jpg' },
                 { src: './1973/1973-02/2.jpg' }, 
-            ],
+            ],*/
             // 当前展示的图片index
             currentIndex: 0,
             //记录偏移量
