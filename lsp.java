@@ -1,4 +1,5 @@
 /*
+ * javac -encoding UTF-8 lsp.java
  * javac lsp.java
  * java lsp
  */
