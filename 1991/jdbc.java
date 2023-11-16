@@ -1,24 +1,29 @@
+import com.mysql.cj.jdbc.Driver;
 
- 
- import com.mysql.cj.jdbc.Driver;
- 
- import java.lang.reflect.Constructor;
- import java.lang.reflect.InvocationTargetException;
- import java.sql.Connection;
- import java.sql.SQLException;
- import java.util.Properties;
- 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.sql.Statement;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.DriverManager;
+import java.util.Properties;
+
  /*
   * #编译
-javac -encoding UTF-8 -cp E:\my_code\lsp\1991\work_lib\mysql-connector-java-8.0.11.jar jdbc.java
-#执行class文件需要加上“.;”代表从当前目录查找主类。否则会报“找不到或无法加载主类”的错误
-java -cp .;E:\my_code\lsp\1991\work_lib\mysql-connector-java-8.0.11.jar jdbc
+  * javac -encoding UTF-8 -cp E:\my_code\lsp\1991\work_lib\mysql-connector-java-8.0.11.jar jdbc.java
+  *
+  * #执行class文件需要加上“.;”代表从当前目录查找主类。否则会报“找不到或无法加载主类”的错误
+  * java -cp .;E:\my_code\lsp\1991\work_lib\mysql-connector-java-8.0.11.jar jdbc
   */
 //java获取连接的5种方式
 public class jdbc {
     public static void main(String[] args) throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
         connect01();
-        connect02();
+        //connect02();
  
     }
     //方式一，直接导入第三方库驱动类
@@ -33,8 +38,39 @@ public class jdbc {
         Properties properties = new Properties();
         properties.setProperty("user","root");//用户
         properties.setProperty("password","123456");//密码
-        final Connection connect = driver.connect(url, properties);
-        System.out.println(connect);
+        final Connection connection = driver.connect(url, properties);
+        System.out.println(connection);
+
+        //3.执行 SQL语句
+       String sql1 = "CREATE TABLE news(id INT,content VARCHAR(32))";
+       String sql2="INSERT INTO news VALUES (1,'居民健康'),(2,'商品健康'),(3,'大熊猫')";
+       String sql3="UPDATE news SET content='湖北'WHERE id=1;";
+        final Statement statement = connection.createStatement();
+        final int row1 = statement.executeUpdate(sql1);//返回影响的行数
+        final int row2 = statement.executeUpdate(sql2);//返回影响的行数
+        final int row3 = statement.executeUpdate(sql3);
+ 
+        //：验证是否执行成功
+        if(row1!=0){
+            System.out.println("执行成功");
+ 
+        }else {
+            System.out.println("执行失败");
+        }
+        if (row2!=0){
+            System.out.println("执行成功");
+        }else {
+            System.out.println("执行失败");
+        }
+        if(row3!=0){
+            System.out.println("执行成功");
+        }else {
+            System.out.println("执行失败");
+        }
+ 
+        //4.关闭资源
+        statement.close();
+        connection.close();
     }
     //方式二：使用反射加载Driver：动态加载，更加的灵活，减少依赖
     public static void connect02() throws ClassNotFoundException, InstantiationException, IllegalAccessException, SQLException, NoSuchMethodException, InvocationTargetException {
@@ -55,7 +91,7 @@ public class jdbc {
     }
 
     //方式三：使用DriverManager替换Driver
-    /*public static void connect03() throws SQLException, InvocationTargetException, InstantiationException, IllegalAccessException, NoSuchMethodException, ClassNotFoundException {
+    public static void connect03() throws SQLException, InvocationTargetException, InstantiationException, IllegalAccessException, NoSuchMethodException, ClassNotFoundException {
         //DriverManager类支持更好的获取连接的方法,可以直接将用户和密码作为参数，而不用存储到Properities
         final Class<?> clazz = Class.forName("com.mysql.cj.jdbc.Driver");
         final Constructor<?> constructor = clazz.getDeclaredConstructor();
@@ -83,6 +119,25 @@ public class jdbc {
         final Connection connection = DriverManager.getConnection(url, user, password);
         System.out.println(connection);
  
-    }*/
+    }
+
+    //方式五:进一步优化，将信息写入到配置文件
+    public static void connect05() throws IOException, ClassNotFoundException, SQLException {
+        //通过Properties对象获取配置文件信息
+        Properties properties = new Properties();
+        File file=new File("mysql.properties");
+        properties.load(new FileInputStream(file));//此时已经将配置文件的信息读取到了Properties中
+        //properties.load(new FileInputStream("src\\mysql.properties"));//此时已经将配置文件的信息读取到了Properties中
+        //获取相关信息
+        final String user = properties.getProperty("user");//用户
+        final String password = properties.getProperty("password");//密码
+        final String url = properties.getProperty("url");//url
+        final String driver = properties.getProperty("driver");
+         Class.forName(driver);//注册驱动
+        final Connection connection = DriverManager.getConnection(url, user, password);//获取连接
+        System.out.println(connection);
+ 
+ 
+    }
 }
  
